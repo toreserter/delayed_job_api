@@ -1,8 +1,6 @@
 # DelayedJobApi
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/delayed_job_api`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+This gem is for creating an API gateway to your DJs to monitor them.
 
 ## Installation
 
@@ -12,27 +10,22 @@ Add this line to your application's Gemfile:
 gem 'delayed_job_api'
 ```
 
-And then execute:
+Then run `bundle install`
 
-    $ bundle install
+Next, you need to run the generator:
+```ruby
+rails generate delayed_job_api:install
+```
+The generator will install an initializer where you can set client_id and client_secret.
 
-Or install it yourself as:
+Also you need to add this line in your `routes.rb` file
 
-    $ gem install delayed_job_api
+```ruby
+ mount DelayedJobApi::App, at: "/delayed_job"
+```
 
 ## Usage
 
-TODO: Write usage instructions here
-
-## Development
-
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
-
-## Contributing
-
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/delayed_job_api.
 
 
 ## License
