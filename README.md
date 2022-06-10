@@ -7,7 +7,7 @@ This gem is for creating an API gateway to your DJs to monitor them.
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'delayed_job_api'
+gem 'delayed_job_api', github: 'toreserter/delayed_job_api'
 ```
 
 Then run `bundle install`
