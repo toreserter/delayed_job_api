@@ -35,9 +35,10 @@ module DelayedJobApi
 
     get '/stats' do
       {
-        enqueued: delayed_jobs(:failed, @queues).count,
+        enqueued: delayed_jobs(:enqueued, @queues).count,
         pending: delayed_jobs(:pending, @queues).count,
         working: delayed_jobs(:working, @queues).count,
+        failed: delayed_jobs(:failed, @queues).count,
         queues: delayed_jobs(nil).group(:queue).size
       }.to_json
     end
@@ -99,9 +100,9 @@ module DelayedJobApi
 
     def authenticated?
       begin
-        signature = request_headers['signature']
-        a = decrypt_message(signature, DelayedJobApi.configuration.client_secret)
-        a == DelayedJobApi.configuration.client_id
+        encoded_data = Addressable::URI.form_encode(params)
+        return false unless Time.at(params[:nonce].to_i) > Time.now - 15.seconds
+        (request_headers['client_id'] == DelayedJobApi.configuration.client_id) && (request_headers['signature'] == OpenSSL::HMAC.hexdigest('sha512', DelayedJobApi.configuration.client_secret, encoded_data))
       rescue => e
         false
       end
@@ -133,14 +134,6 @@ module DelayedJobApi
       rescue ActiveRecord::RecordNotFound
         halt(404)
       end
-    end
-
-    def decrypt_message(encrypted_message, key)
-      cipher = OpenSSL::Cipher.new('DES-EDE3-CBC').decrypt
-      cipher.key = key
-      s = [encrypted_message].pack("H*").unpack("C*").pack("c*")
-
-      cipher.update(s) + cipher.final
     end
 
   end
