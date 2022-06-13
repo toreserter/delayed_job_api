@@ -106,7 +106,7 @@ module DelayedJobApi
 
     def authenticated?
       begin
-        encoded_data = Addressable::URI.form_encode(params)
+        encoded_data = Addressable::URI.parse(request.url).query
         (request_headers['client_id'] == DelayedJobApi.configuration.client_id) && (request_headers['signature'] == OpenSSL::HMAC.hexdigest('sha512', DelayedJobApi.configuration.client_secret, encoded_data))
       rescue => e
         false
