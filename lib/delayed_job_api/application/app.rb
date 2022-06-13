@@ -5,12 +5,7 @@ require 'active_record'
 require 'delayed_job'
 module DelayedJobApi
   class App < Sinatra::Base
-    helpers do
-      def request_headers
-        env.inject({}) { |acc, (k, v)| acc[$1.downcase] = v if k =~ /^http_(.*)/i; acc }
-      end
-    end
-
+    
     def offset
       params[:offset].to_i
     end
@@ -96,7 +91,8 @@ module DelayedJobApi
 
     def authenticate!
       halt 401, "Timestamp for this request is outside of the window" unless timestamp_valid?
-      halt 401, "You are not authorized to access this resource" unless authenticated?
+      halt 401, "You are not authorized to access this resource(1)" unless client_id_correct?
+      halt 401, "You are not authorized to access this resource(2)" unless signature_correct?
     end
 
     def timestamp_valid?
@@ -104,10 +100,14 @@ module DelayedJobApi
       Time.at(params[:nonce].to_i) > Time.now - nonce_window.seconds
     end
 
-    def authenticated?
+    def client_id_correct?
+      (request.env['HTTP_CLIENT_ID'] == DelayedJobApi.configuration.client_id)
+    end
+
+    def signature_correct?
       begin
         encoded_data = Addressable::URI.parse(request.url).query
-        (request_headers['client_id'] == DelayedJobApi.configuration.client_id) && (request_headers['signature'] == OpenSSL::HMAC.hexdigest('sha512', DelayedJobApi.configuration.client_secret, encoded_data))
+        (request.env['HTTP_SIGNATURE'] == OpenSSL::HMAC.hexdigest('sha512', DelayedJobApi.configuration.client_secret, encoded_data))
       rescue => e
         false
       end
