@@ -5,7 +5,7 @@ require 'active_record'
 require 'delayed_job'
 module DelayedJobApi
   class App < Sinatra::Base
-    
+
     def offset
       params[:offset].to_i
     end
@@ -91,8 +91,8 @@ module DelayedJobApi
 
     def authenticate!
       halt 401, "Timestamp for this request is outside of the window" unless timestamp_valid?
-      halt 401, "You are not authorized to access this resource(1)" unless client_id_correct?
-      halt 401, "You are not authorized to access this resource(2)" unless signature_correct?
+      halt 401, "You are not authorized to access this resource(1)(#{request.env['HTTP_CLIENT_ID']})" unless client_id_correct?
+      halt 401, "You are not authorized to access this resource(2)(#{request.env['HTTP_SIGNATURE']})" unless signature_correct?
     end
 
     def timestamp_valid?
