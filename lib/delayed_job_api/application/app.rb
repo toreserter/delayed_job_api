@@ -95,13 +95,18 @@ module DelayedJobApi
     end
 
     def authenticate!
+      halt 401, "Timestamp for this request is outside of the window" unless timestamp_valid?
       halt 401, "You are not authorized to access this resource" unless authenticated?
+    end
+
+    def timestamp_valid?
+      nonce_window = params[:nonce_window].to_i == 0 ? 15 : params[:nonce_window].to_i
+      Time.at(params[:nonce].to_i) > Time.now - nonce_window.seconds
     end
 
     def authenticated?
       begin
         encoded_data = Addressable::URI.form_encode(params)
-        return false unless Time.at(params[:nonce].to_i) > Time.now - 15.seconds
         (request_headers['client_id'] == DelayedJobApi.configuration.client_id) && (request_headers['signature'] == OpenSSL::HMAC.hexdigest('sha512', DelayedJobApi.configuration.client_secret, encoded_data))
       rescue => e
         false
