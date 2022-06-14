@@ -3,6 +3,7 @@ require 'sinatra/base'
 require 'active_support'
 require 'active_record'
 require 'delayed_job'
+require 'addressable'
 module DelayedJobApi
   class App < Sinatra::Base
 
